@@ -21,20 +21,18 @@ function Calendar() {
 
     for (let i = 0; i <= currentDate.currentMonthMaxDay / 7; i++) {
       weeks.push(new Array(7).fill(0).map((_, y) => y + (i * 7) + 1));
-
-      if (i === 0) {
-        for (let i = 0; i < prevMonthDate.getDay(); i++) {
-          weeks[0][i] += prevMonthDateMaxDays - prevMonthDate.getDay();
-        }
-      }
     }
 
     for (let i = 0; i < weeks.length; i++) {
-      for (let j = i === 0 ? prevMonthDate.getDay() : 0; j < weeks[i].length; j++) {
-        weeks[i][j] -= prevMonthDate.getDay();
+      for (let j = 0; j < weeks[i].length; j++) {
+        if (i === 0 && j < prevMonthDate.getDay()) {
+          weeks[i][j] += prevMonthDateMaxDays - prevMonthDate.getDay();
+        } else {
+          weeks[i][j] -= prevMonthDate.getDay();
 
-        if (weeks[i][j] > currentDate.currentMonthMaxDay) {
-          weeks[i][j] %= currentDate.currentMonthMaxDay;
+          if (weeks[i][j] > currentDate.currentMonthMaxDay) {
+            weeks[i][j] %= currentDate.currentMonthMaxDay;
+          }
         }
       }
     }
