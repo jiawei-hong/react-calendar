@@ -1,0 +1,30 @@
+* {
+  font-family: monospace;
+}
+
+table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 22px;
+
+  thead {
+    tr {
+      &:first-child {
+        th {
+          user-select: none;
+
+          &:first-child,
+          &:last-child {
+            cursor: pointer;
+          }
+        }
+      }
+    }
+  }
+
+  th,
+  td {
+    border: 1px solid #ddd;
+    padding: 20px;
+  }
+}
