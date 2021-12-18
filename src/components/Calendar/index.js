@@ -3,6 +3,11 @@ import './index.scss'
 
 function Calendar() {
   const [date, setDate] = useState(new Date());
+  const current = new Date();
+  const dateNames = {
+    month: ["January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"],
+    day: ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'],
+  }
 
   const currentDate = useMemo(() => {
     return {
@@ -40,12 +45,16 @@ function Calendar() {
     return weeks;
   }, [currentDate])
 
-  const setMonth = (asc = false) => {
-    setDate(new Date(
-      currentDate.year,
-      currentDate.month + (asc ? 1 : -1),
-      currentDate.date
-    ))
+  const addYear = (year = 1) => {
+    setDate(new Date(date.setFullYear(date.getFullYear() + year)));
+  }
+
+  const addMonth = (month = 1) => {
+    setDate(new Date(date.setMonth(date.getMonth() + month)));
+  }
+
+  const addDay = (day = 1) => {
+    setDate(new Date(date.setDate(date.getDate() + day)));
   }
 
   return (
@@ -53,19 +62,15 @@ function Calendar() {
       <table>
         <thead>
           <tr>
-            <th colSpan={2} onClick={() => setMonth()}>&lt;</th>
-            <th colSpan={3}>{currentDate.year}-{currentDate.month + 1}</th>
-            <th colSpan={2} onClick={() => setMonth(true)}>&gt;</th>
+            <th onClick={() => addYear(-1)}>&lt;&lt;</th>
+            <th onClick={() => addMonth(-1)}>&lt;</th>
+            <th colSpan={3}>{dateNames.month[currentDate.month]} {currentDate.year}</th>
+            <th onClick={() => addMonth()}>&gt;</th>
+            <th onClick={() => addYear()}>&gt;&gt;</th>
           </tr>
 
           <tr>
-            <th>星期日</th>
-            <th>星期一</th>
-            <th>星期二</th>
-            <th>星期三</th>
-            <th>星期四</th>
-            <th>星期五</th>
-            <th>星期六</th>
+            {dateNames.day.map((day, i) => <th key={i}>{day.substring(0, 3)}.</th>)}
           </tr>
         </thead>
 
@@ -74,8 +79,14 @@ function Calendar() {
             currentDateWeekArray.map((weeks, i) => (
               <tr key={'weeks' + i}>
                 {
-                  weeks.map((x, i) => (
-                    <td key={'days' + i}>{x}</td>
+                  weeks.map((day, i) => (
+                    <td
+                      key={'days' + i}
+                      className={currentDate.year === current.getFullYear() && day === current.getDate() ? 'currentDay' : ''}
+                    >
+                      {day}
+                      {day < 10 && (<span onClick={() => alert('ttttt')} className='dot' />)}
+                    </td>
                   ))
                 }
               </tr>
