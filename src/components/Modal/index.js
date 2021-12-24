@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useMemo, useState } from "react";
 import MODAL_STATUS from './status';
 import './index.scss';
 import { useIndexedDB } from "../../indexed-db";
@@ -9,28 +9,17 @@ function Modal(props) {
   const [data, setData] = useState({
     name: '',
     description: '',
-    date: ''
   })
+  const getPropsCurrentDate = useMemo(() => `${props.date.year}-${props.date.month}-${props.date.day}`, [props.date]);
 
   useEffect(() => {
     getEventsData();
-
-    setData({
-      ...data,
-      date: `${props.date.year}-${props.date.month}-${props.date.day}`
-    });
-
-    console.log(data);
-  }, [
-    props.date.year,
-    props.date.month,
-    props.date.day
-  ]);
+  }, [props.date]);
 
   const getEventsData = async () => {
     const eventData = await eventStore.getAll();
 
-    setEvents(eventData.filter(x => x.date.indexOf(data.date) !== -1));
+    setEvents(eventData.filter(x => x.date.indexOf(getPropsCurrentDate) !== -1));
   }
   const changeModalVisible = () => props.changeModalVisible();
   const addEvent = async val => await eventStore.add(val)
@@ -46,7 +35,13 @@ function Modal(props) {
               <img
                 className="modal-back"
                 src="https://img.icons8.com/material-rounded/24/000000/assignment-return.png"
-                onClick={() => props.changeModalStatus(MODAL_STATUS.SHOW)}
+                onClick={() => {
+                  props.changeModalStatus(MODAL_STATUS.SHOW)
+                  setData({
+                    name: '',
+                    description: ''
+                  })
+                }}
                 alt="Cannot use..."
               />
               <h1>{props.date.year}-{props.date.month}-{props.date.day}</h1>
@@ -104,20 +99,27 @@ function Modal(props) {
                   <button className="btn-primary" onClick={() => {
                     switch (props.status) {
                       case MODAL_STATUS.ADD: {
-                        addEvent(data);
+                        addEvent({
+                          ...data,
+                          date: getPropsCurrentDate
+                        });
 
                         break;
                       }
 
                       case MODAL_STATUS.UPDATE: {
                         updateEvent(data);
-
                         break;
                       }
 
                       default:
                         destroyEvent(data.id);
                     }
+
+                    setData({
+                      name: '',
+                      description: ''
+                    })
 
                     getEventsData();
                     props.changeModalStatus(MODAL_STATUS.SHOW);

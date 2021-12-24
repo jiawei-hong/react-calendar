@@ -98,8 +98,7 @@ function Calendar() {
           <tr>
             <th onClick={() => addYear(-1)}>&lt;&lt;</th>
             <th onClick={() => addMonth(-1)}>&lt;</th>
-            <th colSpan={3}>{dateNames.month[currentDate.month]} {currentDate.year}---
-              {modalData.year}-{modalData.month}-{modalData.day}</th>
+            <th colSpan={3}>{dateNames.month[currentDate.month]} {currentDate.year}</th>
             <th onClick={() => addMonth()}>&gt;</th>
             <th onClick={() => addYear()}>&gt;&gt;</th>
           </tr>
