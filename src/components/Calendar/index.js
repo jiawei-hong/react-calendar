@@ -51,6 +51,7 @@ function Calendar() {
 
           if (currentMonth[i][j].month === 0) {
             currentMonth[i][j].month = 12;
+            currentMonth[i][j].year -= 1;
           }
         } else {
           currentMonth[i][j].day -= prevMonthDate.getDay();
@@ -121,8 +122,8 @@ function Calendar() {
                       }}
                       key={'days' + i}
                       className={
-                        currentDate.year === current.getFullYear() &&
-                          currentDate.month === current.getMonth() &&
+                        current.getFullYear() === date.year &&
+                          current.getMonth() + 1 === date.month &&
                           current.getDate() === date.day ? 'currentDay' : ''
                       }
                     >
