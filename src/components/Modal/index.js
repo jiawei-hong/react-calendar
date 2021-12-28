@@ -1,30 +1,13 @@
-import React, { useEffect, useMemo, useState } from "react";
+import React, { useState } from "react";
 import MODAL_STATUS from './status';
 import './index.scss';
-import { useIndexedDB } from "../../indexed-db";
 
 function Modal(props) {
-  const eventStore = useIndexedDB('events')
-  const [events, setEvents] = useState([])
   const [data, setData] = useState({
     name: '',
     description: '',
   })
-  const getPropsCurrentDate = useMemo(() => `${props.date.year}-${props.date.month}-${props.date.day}`, [props.date]);
-
-  useEffect(() => {
-    getEventsData();
-  }, [props.date]);
-
-  const getEventsData = async () => {
-    const eventData = await eventStore.getAll();
-
-    setEvents(eventData.filter(x => x.date.indexOf(getPropsCurrentDate) !== -1));
-  }
   const changeModalVisible = () => props.changeModalVisible();
-  const addEvent = async val => await eventStore.add(val)
-  const updateEvent = async val => await eventStore.update(val);
-  const destroyEvent = async val => await eventStore.destroy(val);
 
   return (
     <React.Fragment>
@@ -54,7 +37,7 @@ function Modal(props) {
             <div className="modal-body">
               {
                 props.status === MODAL_STATUS.SHOW && (
-                  events.map((event, i) => (
+                  props.data.map((event, i) => (
                     <div className="modal-list" key={i}>
                       <div className="modal-details">
                         <p>事件名稱:{event.name}</p>
@@ -63,11 +46,11 @@ function Modal(props) {
                       <div className="modal-opartion-buttons">
                         <button className="btn-warning" onClick={() => {
                           props.changeModalStatus(MODAL_STATUS.UPDATE)
-                          setData(events[i])
+                          setData(props.data[i])
                         }}>修改</button>
                         <button className="btn-danger" onClick={() => {
                           props.changeModalStatus(MODAL_STATUS.DESTROY)
-                          setData(events[i])
+                          setData(props.data[i])
                         }}>刪除</button>
                       </div>
                     </div>
@@ -99,21 +82,21 @@ function Modal(props) {
                   <button className="btn-primary" onClick={() => {
                     switch (props.status) {
                       case MODAL_STATUS.ADD: {
-                        addEvent({
+                        props.add({
                           ...data,
-                          date: getPropsCurrentDate
+                          date: props.currentDate
                         });
 
                         break;
                       }
 
                       case MODAL_STATUS.UPDATE: {
-                        updateEvent(data);
+                        props.update(data);
                         break;
                       }
 
                       default:
-                        destroyEvent(data.id);
+                        props.destroy(data.id);
                     }
 
                     setData({
@@ -121,7 +104,7 @@ function Modal(props) {
                       description: ''
                     })
 
-                    getEventsData();
+                    props.getEvents();
                     props.changeModalStatus(MODAL_STATUS.SHOW);
                   }}>確定</button>
                 </div>

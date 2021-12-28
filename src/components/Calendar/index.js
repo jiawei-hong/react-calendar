@@ -1,11 +1,14 @@
-import React, { useMemo, useState } from 'react'
+import React, { useEffect, useState, useMemo, useCallback } from 'react'
 import Modal from '../Modal'
+import { useIndexedDB } from "../../indexed-db";
 import MODAL_STATUS from '../Modal/status';
 import './index.scss'
 
 function Calendar() {
   const [date, setDate] = useState(new Date());
   const current = new Date();
+  const store = useIndexedDB('events');
+  const [events, setEvents] = useState([]);
   const [modalVisible, setModalVisible] = useState(false);
   const [modalStatus, setModalStatus] = useState(MODAL_STATUS.SHOW);
   const [modalData, setModalData] = useState({
@@ -17,6 +20,23 @@ function Calendar() {
     month: ["January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"],
     day: ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'],
   }
+
+  const getEvents = useCallback(async () => setEvents(await store.getAll()), [store]);
+  const getEventsWithDate = useCallback((year, month, day) => {
+    const currentDate = `${year}-${month}-${day}`;
+
+    return events.filter(event => event.date === currentDate).length > 0;
+  }, [events]);
+  const getCurrentDate = useMemo(() => `${modalData.year}-${modalData.month}-${modalData.day}`, [
+    modalData.year,
+    modalData.month,
+    modalData.day,
+  ])
+  const getCurrentDateEvents = useMemo(() => events.filter(event => event.date === getCurrentDate), [events, getCurrentDate]);
+
+  useEffect(() => {
+    (async () => setEvents(await store.getAll()))();
+  }, [store])
 
   const currentDate = useMemo(() => {
     return {
@@ -92,6 +112,10 @@ function Calendar() {
     setModalStatus(status);
   }
 
+  const addEvent = async val => await store.add(val);
+  const updateEvent = async val => await store.update(val);
+  const destroyEvent = async val => await store.destroy(val);
+
   return (
     <React.Fragment>
       <table>
@@ -128,6 +152,10 @@ function Calendar() {
                       }
                     >
                       {date.day}
+
+                      {getEventsWithDate(date.year, date.month, date.day) && (
+                        <div className='dot' />
+                      )}
                     </td>
                   ))
                 }
@@ -140,7 +168,13 @@ function Calendar() {
       <Modal
         visible={modalVisible}
         date={modalData}
+        data={getCurrentDateEvents}
         status={modalStatus}
+        currentDate={getCurrentDate}
+        getEvents={getEvents}
+        add={addEvent}
+        update={updateEvent}
+        destroy={destroyEvent}
         changeModalVisible={changeModalVisible}
         changeModalStatus={changeModalStatus}
       />
